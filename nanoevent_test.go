@@ -83,4 +83,21 @@ func TestUnsubscribeListener(t *testing.T) {
 	if counter != 1 {
 		t.Errorf("Expected count to be equal to 1, but got %d", counter)
 	}
+
+}
+
+func TestDeleteEvent(t *testing.T) {
+	eventEmitter := New()
+
+	counter := 0
+
+	unsubscribe := eventEmitter.On("count", func(number int) {
+		counter += number
+	})
+
+	unsubscribe()
+
+	if value, ok := eventEmitter.listeners["count"]; ok {
+		t.Errorf("Expected event to be deleted, but got %v", value)
+	}
 }
