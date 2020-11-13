@@ -2,24 +2,25 @@ package nanoevent
 
 import (
 	"reflect"
+	"sync"
 )
 
-type listener interface{}
+type listenerFunc interface{}
 
 // EventEmitter struct
 type EventEmitter struct {
-	listeners map[string][]listener
+	listeners map[string][]listenerFunc
 }
 
 // New creates a new EventEmitter
 func New() *EventEmitter {
 	eventEmitter := new(EventEmitter)
-	eventEmitter.listeners = make(map[string][]listener)
+	eventEmitter.listeners = make(map[string][]listenerFunc)
 	return eventEmitter
 }
 
 // On subscribes a listener to an event
-func (eventEmitter *EventEmitter) On(event string, listener listener) func() {
+func (eventEmitter *EventEmitter) On(event string, listener listenerFunc) func() {
 	listeners := eventEmitter.listeners
 	listeners[event] = append(listeners[event], listener)
 
@@ -45,8 +46,18 @@ func (eventEmitter *EventEmitter) Emit(event string, args ...interface{}) {
 		vargs[i] = reflect.ValueOf(v)
 	}
 
+	var wg sync.WaitGroup
+
 	for _, listener := range listeners {
-		fnValue := reflect.ValueOf(listener)
-		fnValue.Call(vargs)
+		wg.Add(1)
+
+		go func(l listenerFunc) {
+			defer wg.Done()
+
+			fnValue := reflect.ValueOf(l)
+			fnValue.Call(vargs)
+		}(listener)
 	}
+
+	wg.Wait()
 }
