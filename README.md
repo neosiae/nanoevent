@@ -2,6 +2,22 @@
 
 Tiny event emitter for Go
 
+## Example
+
+```go
+eventEmitter := nanoevent.New()
+
+unsubscribe := eventEmitter.On("event", func(message string) {
+    fmt.Println(message)
+})
+
+eventEmitter.Emit("event", "Hello Go!") // Prints Hello Go
+
+unsubscribe()
+
+eventEmitter.Emit("event", "Hi Go!") // Prints nothing
+```
+
 ## API
 
 ### func New
