@@ -29,3 +29,7 @@ func (eventEmitter *EventEmitter) Emit(event string, args ...interface{})
 ```
 
 Emit emits an event to the listeners.
+
+## License
+
+MIT
